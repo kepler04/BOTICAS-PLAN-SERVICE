@@ -7,7 +7,7 @@
 - [x] README con capturas, arquitectura, pruebas y límites; LICENSE (MIT); CI de GitHub Actions.
 - [ ] Rotar la contraseña de la BD del proyecto Supabase remoto (se compartió en una conversación) antes de publicar.
 - [x] Repositorio en GitHub: https://github.com/kepler04/BOTICAS-PLAN-SERVICE
-- [ ] Demo en línea: hosting estático gratis (Netlify o Cloudflare Pages) + usuario de demo. Decidir: cerrar el registro público o dejarlo abierto.
+- [x] Demo en línea en Vercel (https://servicefarma.vercel.app) con usuarios de demo. Pendiente decidir: cerrar el registro público o dejarlo abierto.
 - [x] Insignia del CI y enlace a la demo en el README.
 - [ ] Completar el nombre del titular en `LICENSE`.
 
@@ -80,7 +80,7 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [ ] Varias sucursales: `member_branches`, precios por sucursal y traslados.
 - [ ] Toma de inventario guiada (conteo físico), descuentos/promociones, etiquetas de código de barras.
 - [ ] Alternativas también para productos **con** stock (p. ej. ofrecer el genérico más barato).
-- [ ] Aplicar las migraciones de la Fase 5 al proyecto Supabase remoto (con `db push --dry-run` primero) y desplegar `invite-user` (`supabase functions deploy invite-user`, con `SITE_URL` y la URL del sitio en *Redirect URLs*).
+- [x] Migraciones de las Fases 5 y 6 aplicadas al Supabase remoto (2026-10-24). Pendiente: desplegar `invite-user` (requiere `supabase login` del dueño) y configurar *Site URL* / *Redirect URLs*.
 
 ## Fase 6 (cliente, temperatura, DIGEMID, compras, kardex): pendientes
 - [ ] **Sugerido de compra** por rotación y stock mínimo; órdenes de compra y cuentas por pagar.
@@ -89,7 +89,7 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [ ] Verificar el formato vigente del reporte de precios de DIGEMID y, si es estable, generar el archivo exacto (ADR 065).
 - [ ] Política de datos personales de clientes (Ley 29733): quién los ve, cuánto se guardan, cómo se borran.
 - [ ] Buscar al cliente por nombre en el POS (hoy por documento) e historial de compras por cliente.
-- [ ] Aplicar al Supabase remoto las migraciones `20261028000000` a `20261028000003` (con `db push --dry-run` primero).
+- [x] Migraciones `20261028000000` a `20261029000000` aplicadas al Supabase remoto (2026-10-24).
 
 ## Calidad (refactor del 2026-10-24)
 - [x] Lógica de lotes en un solo lugar (`private.receive_lot`, ADR 069).

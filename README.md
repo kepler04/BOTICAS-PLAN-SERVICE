@@ -1,6 +1,6 @@
 # Boticas ERP
 
-[![CI](https://github.com/kepler04/BOTICAS-PLAN-SERVICE/actions/workflows/ci.yml/badge.svg)](https://github.com/kepler04/BOTICAS-PLAN-SERVICE/actions/workflows/ci.yml) · **Demo en vivo:** [servicefarma.vercel.app](https://servicefarma.vercel.app)
+[![CI](https://github.com/kepler04/BOTICAS-PLAN-SERVICE/actions/workflows/ci.yml/badge.svg)](https://github.com/kepler04/BOTICAS-PLAN-SERVICE/actions/workflows/ci.yml) · **Demo en vivo:** [servicefarma.vercel.app](https://servicefarma.vercel.app) — entra como administrador con `demo@boticas-erp.demo` o como cajero con `cajero@boticas-erp.demo` (contraseña `DemoBotica2026`; datos ficticios).
 
 ERP SaaS **multi-tenant** para boticas pequeñas del Perú: punto de venta, inventario con lotes y vencimientos, control de caja y reportes de ganancia. Funciona desde el celular o la computadora.
 
