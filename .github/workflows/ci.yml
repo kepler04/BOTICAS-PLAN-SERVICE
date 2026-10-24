@@ -1,0 +1,83 @@
+name: "CI"
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: "Lint, tipos, pruebas y build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --run
+      - run: npm run build
+
+  database:
+    name: "Base de datos (pgTAP) e integración"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Supabase local en Docker. Se omiten los servicios que las pruebas no usan para acelerar el arranque.
+      - name: "Levantar Supabase local"
+        run: npx supabase start -x studio,imgproxy,logflare,vector,realtime,storage-api,mailpit,supavisor
+      - name: "Pruebas de la base de datos (pgTAP: RLS, ventas, caja, reportes)"
+        run: npx supabase test db
+      - name: "Pruebas de integración (servicios reales contra PostgREST)"
+        run: npm run test:integration
+      - name: "Los tipos generados deben coincidir con el esquema"
+        run: |
+          npm run db:types
+          git diff --exit-code src/types/database.types.ts || (echo "database.types.ts está desactualizado: ejecuta npm run db:types" && exit 1)
+
+  browser:
+    name: "Navegador real: E2E, accesibilidad, PWA y CSP"
+    runs-on: ubuntu-latest
+    env:
+      # La botica opera en hora de Lima: así "hoy" coincide entre Node, el navegador y la base de datos.
+      TZ: America/Lima
+      E2E_BROWSER: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # El E2E necesita edge-runtime (invitar usuarios); no se excluye.
+      - name: "Levantar Supabase local"
+        run: npx supabase start -x studio,imgproxy,logflare,vector,realtime,storage-api,mailpit,supavisor
+      - name: "Recorrido E2E (registro → ventas → compras → usuarios…)"
+        run: npm run test:e2e
+      - name: "Datos de demostración (los usan las auditorías)"
+        run: npm run demo:seed
+      - name: "Accesibilidad (axe, WCAG 2.1 A/AA)"
+        run: npm run test:a11y
+      - name: "PWA"
+        run: npm run test:pwa
+      - name: "CSP"
+        run: npm run test:csp
+      - name: "Capturas del fallo"
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-output
+          path: e2e-output/
+          if-no-files-found: ignore
