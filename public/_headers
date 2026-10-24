@@ -1,0 +1,27 @@
+# Cabeceras de seguridad. Formato compatible con Netlify y Cloudflare Pages.
+# Verificadas por `npm run test:csp` (sirve la compilación con ESTAS cabeceras y comprueba que la app no las viole).
+#
+# CSP:
+#  - script-src 'self'            -> sin scripts en línea ni de terceros: un XSS no puede ejecutar código.
+#  - style-src ... 'unsafe-inline' -> necesario: React escribe atributos style="" y sonner inyecta un <style>.
+#                                    Solo afecta a estilos (no a scripts).
+#  - connect-src                   -> el propio sitio y Supabase (https y wss para realtime).
+#    Si usas un dominio propio en Supabase, agrégalo aquí.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+# Archivos con hash en el nombre: nunca cambian.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# El service worker y el manifiesto deben revalidarse siempre para que las actualizaciones lleguen.
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
+  Content-Type: application/manifest+json

@@ -1,0 +1,22 @@
+{
+  "name": "Boticas ERP",
+  "short_name": "Boticas",
+  "description": "Punto de venta, inventario, caja y reportes para boticas.",
+  "lang": "es-PE",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fafafa",
+  "theme_color": "#171717",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nueva venta", "short_name": "Vender", "url": "/ventas", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Inventario", "url": "/inventario", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Caja", "url": "/caja", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
