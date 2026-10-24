@@ -6,9 +6,9 @@
 - [x] Datos de demostración reproducibles (`npm run demo:seed`), con reset.
 - [x] README con capturas, arquitectura, pruebas y límites; LICENSE (MIT); CI de GitHub Actions.
 - [ ] Rotar la contraseña de la BD del proyecto Supabase remoto (se compartió en una conversación) antes de publicar.
-- [ ] Commit inicial limpio y repositorio en GitHub (el push lo hace el dueño).
+- [x] Repositorio en GitHub: https://github.com/kepler04/BOTICAS-PLAN-SERVICE
 - [ ] Demo en línea: hosting estático gratis (Netlify o Cloudflare Pages) + usuario de demo. Decidir: cerrar el registro público o dejarlo abierto.
-- [ ] Insignia del CI en el README cuando se conozca la ruta del repositorio.
+- [x] Insignia del CI y enlace a la demo en el README.
 - [ ] Completar el nombre del titular en `LICENSE`.
 
 ## Verificación de Fase 1 (necesita acción humana)
