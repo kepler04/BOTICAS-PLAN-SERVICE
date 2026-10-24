@@ -179,6 +179,58 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"einvoice_sequences": {
+                  Row: {
+                    "last_number": number,"pharmacy_id": string,"series": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "last_number"?: number,"pharmacy_id": string,"series": string
+                  }
+                  Update: {
+                    "last_number"?: number,"pharmacy_id"?: string,"series"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "einvoice_sequences_pharmacy_id_fkey"
+      columns: ["pharmacy_id"]
+isOneToOne: false
+      referencedRelation: "pharmacies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"einvoices": {
+                  Row: {
+                    "attempts": number,"cdr_xml": string | null,"created_at": string,"created_by": string | null,"doc_type": string,"environment": string,"hash": string | null,"id": string,"number": number,"pharmacy_id": string,"sale_id": string,"sent_at": string | null,"series": string,"status": Database["public"]['Enums']["einvoice_status"],"sunat_code": string | null,"sunat_description": string | null,"sunat_notes": (string)[],"updated_at": string,"xml": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type": string,"environment"?: string,"hash"?: string | null,"id"?: string,"number": number,"pharmacy_id": string,"sale_id": string,"sent_at"?: string | null,"series": string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
+                  }
+                  Update: {
+                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type"?: string,"environment"?: string,"hash"?: string | null,"id"?: string,"number"?: number,"pharmacy_id"?: string,"sale_id"?: string,"sent_at"?: string | null,"series"?: string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "einvoices_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "einvoices_pharmacy_id_fkey"
+      columns: ["pharmacy_id"]
+isOneToOne: false
+      referencedRelation: "pharmacies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "einvoices_pharmacy_id_sale_id_fkey"
+      columns: ["pharmacy_id","sale_id"]
+isOneToOne: false
+      referencedRelation: "sales"
+      referencedColumns: ["pharmacy_id","id"]
+    }
+                  ]
                 },"environment_readings": {
                   Row: {
                     "area": Database["public"]['Enums']["environment_area"],"branch_id": string,"humidity": number | null,"id": number,"idempotency_key": string | null,"note": string | null,"out_of_range": boolean,"pharmacy_id": string,"recorded_at": string,"recorded_by": string | null,"recorded_on": string,"temperature": number
@@ -313,14 +365,14 @@ isOneToOne: false
                   ]
                 },"pharmacies": {
                   Row: {
-                    "charges_igv": boolean,"created_at": string,"id": string,"legal_name": string,"ruc": string | null,"status": Database["public"]['Enums']["pharmacy_status"],"trade_name": string | null,"updated_at": string
+                    "charges_igv": boolean,"created_at": string,"einvoice_enabled": boolean,"fiscal_address": string | null,"id": string,"legal_name": string,"ruc": string | null,"status": Database["public"]['Enums']["pharmacy_status"],"trade_name": string | null,"ubigeo": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "charges_igv"?: boolean,"created_at"?: string,"id"?: string,"legal_name": string,"ruc"?: string | null,"status"?: Database["public"]['Enums']["pharmacy_status"],"trade_name"?: string | null,"updated_at"?: string
+                    "charges_igv"?: boolean,"created_at"?: string,"einvoice_enabled"?: boolean,"fiscal_address"?: string | null,"id"?: string,"legal_name": string,"ruc"?: string | null,"status"?: Database["public"]['Enums']["pharmacy_status"],"trade_name"?: string | null,"ubigeo"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "charges_igv"?: boolean,"created_at"?: string,"id"?: string,"legal_name"?: string,"ruc"?: string | null,"status"?: Database["public"]['Enums']["pharmacy_status"],"trade_name"?: string | null,"updated_at"?: string
+                    "charges_igv"?: boolean,"created_at"?: string,"einvoice_enabled"?: boolean,"fiscal_address"?: string | null,"id"?: string,"legal_name"?: string,"ruc"?: string | null,"status"?: Database["public"]['Enums']["pharmacy_status"],"trade_name"?: string | null,"ubigeo"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -769,12 +821,40 @@ isOneToOne: false
               "cost": number,"margin": number,"name": string,"net": number,"product_id": string,"profit": number,"revenue": number,"units": number
             }[]
                            },
+"reserve_einvoice":
+{ Args: { "p_sale": string }; Returns: {
+              "attempts": number,
+"cdr_xml": string | null,
+"created_at": string,
+"created_by": string | null,
+"doc_type": string,
+"environment": string,
+"hash": string | null,
+"id": string,
+"number": number,
+"pharmacy_id": string,
+"sale_id": string,
+"sent_at": string | null,
+"series": string,
+"status": Database["public"]['Enums']["einvoice_status"],
+"sunat_code": string | null,
+"sunat_description": string | null,
+"sunat_notes": (string)[],
+"updated_at": string,
+"xml": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "einvoices"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "void_sale":
 { Args: { "p_reason": string,"p_sale": string }; Returns: undefined
                            }
           }
           Enums: {
-            "app_role": "admin"|"cashier","cash_movement_type": "income"|"expense","cash_session_status": "open"|"closed","customer_doc_type": "dni"|"ruc"|"ce"|"passport","environment_area": "room"|"fridge","movement_type": "entry"|"adjustment"|"write_off"|"sale"|"sale_void","payment_method": "cash"|"yape"|"plin"|"card","pharmacy_status": "trial"|"active"|"suspended"|"cancelled","purchase_doc_type": "invoice"|"receipt"|"guide"|"other","sale_presentation": "unit"|"blister"|"box","sale_status": "completed"|"voided","tax_affectation": "gravado"|"exonerado"|"inafecto"
+            "app_role": "admin"|"cashier","cash_movement_type": "income"|"expense","cash_session_status": "open"|"closed","customer_doc_type": "dni"|"ruc"|"ce"|"passport","einvoice_status": "pending"|"accepted"|"observed"|"rejected"|"error","environment_area": "room"|"fridge","movement_type": "entry"|"adjustment"|"write_off"|"sale"|"sale_void","payment_method": "cash"|"yape"|"plin"|"card","pharmacy_status": "trial"|"active"|"suspended"|"cancelled","purchase_doc_type": "invoice"|"receipt"|"guide"|"other","sale_presentation": "unit"|"blister"|"box","sale_status": "completed"|"voided","tax_affectation": "gravado"|"exonerado"|"inafecto"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -894,7 +974,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "app_role": ["admin", "cashier"],"cash_movement_type": ["income", "expense"],"cash_session_status": ["open", "closed"],"customer_doc_type": ["dni", "ruc", "ce", "passport"],"environment_area": ["room", "fridge"],"movement_type": ["entry", "adjustment", "write_off", "sale", "sale_void"],"payment_method": ["cash", "yape", "plin", "card"],"pharmacy_status": ["trial", "active", "suspended", "cancelled"],"purchase_doc_type": ["invoice", "receipt", "guide", "other"],"sale_presentation": ["unit", "blister", "box"],"sale_status": ["completed", "voided"],"tax_affectation": ["gravado", "exonerado", "inafecto"]
+            "app_role": ["admin", "cashier"],"cash_movement_type": ["income", "expense"],"cash_session_status": ["open", "closed"],"customer_doc_type": ["dni", "ruc", "ce", "passport"],"einvoice_status": ["pending", "accepted", "observed", "rejected", "error"],"environment_area": ["room", "fridge"],"movement_type": ["entry", "adjustment", "write_off", "sale", "sale_void"],"payment_method": ["cash", "yape", "plin", "card"],"pharmacy_status": ["trial", "active", "suspended", "cancelled"],"purchase_doc_type": ["invoice", "receipt", "guide", "other"],"sale_presentation": ["unit", "blister", "box"],"sale_status": ["completed", "voided"],"tax_affectation": ["gravado", "exonerado", "inafecto"]
           }
         }
 } as const

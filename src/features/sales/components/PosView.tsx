@@ -150,6 +150,7 @@ export function PosView() {
       <ReceiptDialog
         saleId={doneSaleId}
         title="Venta registrada"
+        autoEmitEinvoice
         onOpenChange={(open) => {
           if (!open) resetSale()
         }}

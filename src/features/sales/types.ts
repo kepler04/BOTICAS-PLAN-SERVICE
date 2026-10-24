@@ -37,6 +37,15 @@ export type SaleItem = Tables<'sale_items'>
 
 export type SaleRow = Tables<'sales'> & {
   profiles: { full_name: string | null } | null
+  /** Comprobante electrónico (solo en el historial). PostgREST lo devuelve como objeto o lista según la relación. */
+  einvoices?: SaleEinvoiceRef | SaleEinvoiceRef[] | null
+}
+
+export type SaleEinvoiceRef = { series: string; number: number; status: Tables<'einvoices'>['status'] }
+
+export function saleEinvoice(row: SaleRow): SaleEinvoiceRef | null {
+  const e = row.einvoices
+  return Array.isArray(e) ? (e[0] ?? null) : (e ?? null)
 }
 
 export type SaleDetail = SaleRow & { sale_items: SaleItem[] }

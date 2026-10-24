@@ -637,6 +637,8 @@ try {
   await step('POS: una venta de más de S/ 700 exige el DNI del cliente y lo imprime', async () => {
     await page.getByRole('link', { name: 'Ventas' }).first().click()
     await page.getByLabel('Buscar producto para vender').fill('parace')
+    // Espera el stock ya actualizado tras la compra (la lista muestra primero lo que tenía en caché).
+    await page.getByText(/Stock: 2\d cajas/).waitFor()
     await page.getByRole('button', { name: /Agregar caja de Paracetamol/ }).click()
     await page.getByLabel('Cantidad de Paracetamol 500 mg (caja)').fill('18') // 18 x 40.00 = 720.00
     await page.getByText('(obligatorio: la venta supera S/ 700)').waitFor()
@@ -681,6 +683,62 @@ try {
     if (!csv.includes('Código DIGEMID,Producto') || !csv.includes('12345,Paracetamol 500 mg')) {
       throw new Error('El CSV de precios no trae el código DIGEMID')
     }
+  })
+
+  // SUNAT BETA es un servicio externo: si no responde desde aquí, el paso se informa como saltado (no falla).
+  const sunatUp = await fetch('https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService?wsdl', { signal: AbortSignal.timeout(10_000) })
+    .then((r) => r.ok)
+    .catch(() => false)
+
+  await step(`Facturación electrónica: activarla y emitir boleta y factura aceptadas por SUNAT BETA${sunatUp ? '' : ' (SALTADO: SUNAT BETA no responde)'}`, async () => {
+    if (!sunatUp) return
+    // RUC válido y distinto en cada corrida (es único entre boticas).
+    const base = '206' + String(Math.floor(Math.random() * 1e7)).padStart(7, '0')
+    const d = 11 - ([...base].reduce((s, c, i) => s + Number(c) * [5, 4, 3, 2, 7, 6, 5, 4, 3, 2][i], 0) % 11)
+    const ruc = base + (d === 10 ? 0 : d === 11 ? 1 : d)
+
+    await page.getByRole('link', { name: 'Configuración' }).first().click()
+    await page.getByRole('switch', { name: 'Emitir comprobantes electrónicos' }).click()
+    await page.getByRole('button', { name: 'Guardar cambios' }).click()
+    await page.getByText('Para emitir comprobantes electrónicos se necesita un RUC válido (con dígito verificador)').waitFor()
+    await page.getByLabel('RUC (opcional)').fill(ruc)
+    await page.getByLabel('Dirección fiscal').fill('Av. Larco 1234, Miraflores, Lima')
+    await page.getByLabel('Ubigeo (opcional)').fill('150122')
+    await page.getByRole('button', { name: 'Guardar cambios' }).click()
+    await page.getByText('Configuración guardada.').first().waitFor()
+
+    // Boleta: venta sin cliente.
+    await page.getByRole('link', { name: 'Ventas' }).first().click()
+    await page.getByLabel('Buscar producto para vender').fill('parace')
+    await page.getByRole('button', { name: /Agregar unidad de Paracetamol/ }).click()
+    await page.getByRole('radio', { name: 'Tarjeta' }).click()
+    await page.getByRole('button', { name: /^Cobrar/ }).click()
+    let receipt = page.getByRole('dialog')
+    await receipt.getByText('Boleta de venta electrónica B001-1').waitFor({ timeout: 30000 })
+    await receipt.getByText(/Aceptada por SUNAT/).waitFor()
+    await receipt.getByRole('img', { name: 'Código QR del comprobante B001-1' }).waitFor()
+    await shot('42-boleta-electronica')
+    await receipt.getByRole('button', { name: 'Nueva venta' }).click()
+
+    // Factura: cliente con RUC.
+    await page.getByLabel('Buscar producto para vender').fill('parace')
+    await page.getByRole('button', { name: /Agregar unidad de Paracetamol/ }).click()
+    await page.getByRole('button', { name: 'Agregar cliente (DNI / RUC)' }).click()
+    await page.getByLabel('Tipo de documento').selectOption('ruc')
+    await page.getByLabel('Número de RUC').fill('20600000048')
+    await page.getByLabel('Nombre o razón social del cliente').fill('Clínica San Gabriel SAC')
+    await page.getByRole('radio', { name: 'Tarjeta' }).click()
+    await page.getByRole('button', { name: /^Cobrar/ }).click()
+    receipt = page.getByRole('dialog')
+    await receipt.getByText('Factura electrónica F001-1').waitFor({ timeout: 30000 })
+    await receipt.getByText(/Aceptada por SUNAT/).waitFor()
+    await receipt.getByText('RUC: 20600000048').waitFor()
+    await receipt.getByRole('button', { name: 'Nueva venta' }).click()
+
+    // Historial: cada venta muestra su comprobante electrónico.
+    await page.getByRole('tab', { name: 'Historial' }).click()
+    await page.getByText('F001-1 · aceptada').waitFor()
+    await page.getByText('B001-1 · aceptada').waitFor()
   })
 
   await step('Vista móvil del POS', async () => {

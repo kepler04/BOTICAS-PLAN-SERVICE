@@ -1,4 +1,6 @@
 import { createPortal } from 'react-dom'
+import { EinvoiceReceiptFooter } from '@/features/einvoice/components/EinvoiceReceiptFooter'
+import { DOC_TYPE_NAMES, type Einvoice } from '@/features/einvoice/services/einvoiceService'
 import { PRESENTATION_LABELS, pluralize } from '@/features/products/lib/presentations'
 import { formatReceiptNumber } from '@/features/sales/lib/cart'
 import type { ReceiptHeader } from '@/features/sales/services/salesService'
@@ -12,12 +14,18 @@ const dateTime = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyl
 type ReceiptViewProps = {
   sale: SaleDetail
   header: ReceiptHeader | undefined
+  /** Si SUNAT lo aceptó, se imprime como representación del comprobante electrónico. */
+  einvoice?: Einvoice | null
 }
 
-/** Comprobante INTERNO de prueba. No es boleta ni factura electrónica SUNAT. */
-export function ReceiptView({ sale, header }: ReceiptViewProps) {
+/**
+ * Comprobante de la venta. Por defecto es un comprobante INTERNO; si SUNAT aceptó su boleta o factura electrónica,
+ * se imprime como su representación impresa (con hash y QR).
+ */
+export function ReceiptView({ sale, header, einvoice }: ReceiptViewProps) {
   const number = formatReceiptNumber(sale.receipt_series, sale.receipt_number)
   const voided = sale.status === 'voided'
+  const electronic = einvoice && (einvoice.status === 'accepted' || einvoice.status === 'observed') && header?.ruc ? einvoice : null
   return (
     <div className="mx-auto w-full max-w-[80mm] bg-white p-3 font-mono text-[12px] leading-snug text-black">
       <div className="space-y-0.5 text-center">
@@ -28,13 +36,24 @@ export function ReceiptView({ sale, header }: ReceiptViewProps) {
       </div>
 
       <div className="my-2 border-y border-dashed border-black py-1 text-center">
-        <p className="font-bold">COMPROBANTE INTERNO DE PRUEBA</p>
-        <p className="text-[10px]">No es boleta ni factura electrónica SUNAT</p>
+        {electronic ? (
+          <>
+            <p className="font-bold">{DOC_TYPE_NAMES[electronic.docType].toUpperCase()}</p>
+            <p className="text-sm font-bold">
+              {electronic.series}-{String(electronic.number).padStart(8, '0')}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-bold">COMPROBANTE INTERNO DE PRUEBA</p>
+            <p className="text-[10px]">No es boleta ni factura electrónica SUNAT</p>
+          </>
+        )}
       </div>
 
       <div className="space-y-0.5">
         <p>
-          <span className="font-bold">N.º {number}</span>
+          <span className={electronic ? '' : 'font-bold'}>{electronic ? `Ticket interno ${number}` : `N.º ${number}`}</span>
           {voided ? <span className="ml-2 font-bold">[ANULADA]</span> : null}
         </p>
         <p>Fecha: {dateTime.format(new Date(sale.created_at))}</p>
@@ -122,6 +141,7 @@ export function ReceiptView({ sale, header }: ReceiptViewProps) {
         {voided && sale.void_reason ? <p>Motivo de anulación: {sale.void_reason}</p> : null}
       </div>
 
+      {electronic && header?.ruc ? <EinvoiceReceiptFooter sale={sale} einvoice={electronic} ruc={header.ruc} /> : null}
       <p className="mt-3 text-center text-[10px]">¡Gracias por su compra!</p>
     </div>
   )

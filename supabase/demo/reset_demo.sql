@@ -19,6 +19,8 @@ begin
     -- Orden por dependencias. Borrar membresias genera filas de auditoria, por eso audit_log va despues.
     delete from public.inventory_movements where pharmacy_id = v_ph;
     delete from public.sale_item_lots where pharmacy_id = v_ph;
+    delete from public.einvoices where pharmacy_id = v_ph;
+    delete from public.einvoice_sequences where pharmacy_id = v_ph;
     delete from public.sale_items where pharmacy_id = v_ph;
     delete from public.sales where pharmacy_id = v_ph;
     delete from public.cash_movements where pharmacy_id = v_ph;

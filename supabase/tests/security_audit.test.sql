@@ -24,16 +24,17 @@ select is(
 select is(
   (select count(*)::int
    from unnest(array['lots', 'inventory_movements', 'sales', 'sale_items', 'sale_item_lots',
-                     'receipt_sequences', 'cash_sessions', 'cash_movements', 'audit_log']) t
+                     'receipt_sequences', 'cash_sessions', 'cash_movements', 'audit_log',
+                     'einvoices', 'einvoice_sequences']) t
    cross join unnest(array['INSERT', 'UPDATE', 'DELETE']) p
    where has_table_privilege('authenticated', 'public.' || t, p)),
-  0, 'las tablas de dinero y stock solo se escriben por RPC: authenticated no puede INSERT/UPDATE/DELETE directo');
+  0, 'las tablas de dinero, stock y comprobantes solo se escriben por RPC: authenticated no puede INSERT/UPDATE/DELETE directo');
 
 select is(
   (select count(*)::int
-   from unnest(array['receipt_sequences']) t
+   from unnest(array['receipt_sequences', 'einvoice_sequences']) t
    where has_table_privilege('authenticated', 'public.' || t, 'SELECT')),
-  0, 'el contador de comprobantes no es legible por la API');
+  0, 'los contadores de comprobantes no son legibles por la API');
 
 -- ---------- Vistas ----------
 select is(
@@ -65,17 +66,17 @@ select ok(not has_schema_privilege('anon', 'private', 'usage'), 'el rol anonimo 
 select is(
   (select count(*)::int from information_schema.tables t
    where t.table_schema = 'public' and t.table_type = 'BASE TABLE'
-     and t.table_name not in ('pharmacies', 'profiles', 'receipt_sequences')
+     and t.table_name not in ('pharmacies', 'profiles', 'receipt_sequences', 'einvoice_sequences')
      and not exists (select 1 from information_schema.columns c
                      where c.table_schema = 'public' and c.table_name = t.table_name and c.column_name = 'pharmacy_id')),
   0, 'toda tabla de negocio lleva pharmacy_id (base del aislamiento entre boticas)');
 
--- Toda tabla con pharmacy_id y RLS tiene al menos una politica (o es deny-all a proposito: receipt_sequences).
+-- Toda tabla con pharmacy_id y RLS tiene al menos una politica (o es deny-all a proposito: los contadores).
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
-   where n.nspname = 'public' and c.relkind = 'r' and c.relname <> 'receipt_sequences'
+   where n.nspname = 'public' and c.relkind = 'r' and c.relname not in ('receipt_sequences', 'einvoice_sequences')
      and not exists (select 1 from pg_policy p where p.polrelid = c.oid)),
-  0, 'toda tabla (salvo el contador, deny-all a proposito) tiene politicas RLS definidas');
+  0, 'toda tabla (salvo los contadores, deny-all a proposito) tiene politicas RLS definidas');
 
 -- Las politicas de lectura de tablas de negocio nunca son "true" (abiertas a cualquier autenticado).
 select is(

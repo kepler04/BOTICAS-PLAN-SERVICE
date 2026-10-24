@@ -78,8 +78,10 @@ try {
   await page.getByText(/Vuelto:/).waitFor()
   await shot('03-punto-de-venta')
   await page.getByRole('button', { name: /^Cobrar/ }).click()
-  await page.getByText('COMPROBANTE INTERNO DE PRUEBA').first().waitFor()
-  await shot('04-comprobante')
+  // La botica demo emite comprobantes electrónicos (SUNAT BETA): la captura espera la respuesta de SUNAT.
+  await page.getByRole('dialog').getByText(/Aceptada por SUNAT/).waitFor({ timeout: 30000 })
+  await page.getByRole('dialog').getByRole('img', { name: /Código QR del comprobante/ }).waitFor()
+  await shot('04-comprobante', { height: 1080 })
   await page.getByRole('dialog').getByRole('button', { name: 'Nueva venta' }).click()
 
   // ---- Productos ----

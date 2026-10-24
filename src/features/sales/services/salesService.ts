@@ -27,6 +27,7 @@ const KNOWN: Record<string, string> = {
   already_voided: 'Esta venta ya estaba anulada.',
   reason_required: 'Escribe el motivo (mínimo 3 letras).',
   not_authenticated: 'Tu sesión expiró. Inicia sesión nuevamente.',
+  einvoice_issued: 'Esta venta ya tiene un comprobante aceptado por SUNAT: anularla requiere una nota de crédito (aún no disponible).',
   customer_required: 'La venta supera S/ 700: SUNAT exige el nombre y el documento del cliente.',
   invalid_customer_doc: 'El documento del cliente no es válido.',
   invalid_customer_name: 'Escribe el nombre o la razón social del cliente.',
@@ -229,7 +230,7 @@ export const salesService = {
     const from = f.page * size
     let query = supabase
       .from('sales')
-      .select('*, profiles!sales_created_by_fkey(full_name)', { count: 'exact' })
+      .select('*, profiles!sales_created_by_fkey(full_name), einvoices(series, number, status)', { count: 'exact' })
       .eq('branch_id', branchId)
       .order('receipt_number', { ascending: false })
       .range(from, from + size - 1)

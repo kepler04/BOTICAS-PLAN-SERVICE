@@ -21,7 +21,7 @@ import { VoidSaleDialog } from '@/features/sales/components/VoidSaleDialog'
 import { useSalesList } from '@/features/sales/hooks/useSales'
 import { formatReceiptNumber } from '@/features/sales/lib/cart'
 import { SALES_PAGE_SIZE, type SalesFilters } from '@/features/sales/services/salesService'
-import { PAYMENT_LABELS, type SaleRow } from '@/features/sales/types'
+import { PAYMENT_LABELS, saleEinvoice, type SaleRow } from '@/features/sales/types'
 import { formatPEN } from '@/lib/format'
 
 const dateTime = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyle: 'short' })
@@ -129,6 +129,7 @@ export function SalesHistory() {
                   <TableCell className="whitespace-normal text-right tabular-nums">
                     <div className={s.status === 'voided' ? 'line-through opacity-60' : ''}>{formatPEN(s.total)}</div>
                     {s.status === 'voided' ? <Badge variant="destructive">Anulada</Badge> : null}
+                    <EinvoiceBadge row={s} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -166,6 +167,20 @@ export function SalesHistory() {
           }}
         />
       ) : null}
+    </div>
+  )
+}
+
+const EINVOICE_LABEL = { accepted: 'aceptada', observed: 'observada', pending: 'pendiente', rejected: 'rechazada', error: 'sin enviar' } as const
+
+/** Número y estado del comprobante electrónico de la venta, si lo tiene. */
+function EinvoiceBadge({ row }: { row: SaleRow }) {
+  const e = saleEinvoice(row)
+  if (!e) return null
+  const ok = e.status === 'accepted' || e.status === 'observed'
+  return (
+    <div className={`text-xs ${ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+      {e.series}-{e.number} · {EINVOICE_LABEL[e.status]}
     </div>
   )
 }

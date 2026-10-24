@@ -91,6 +91,14 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [ ] Buscar al cliente por nombre en el POS (hoy por documento) e historial de compras por cliente.
 - [x] Migraciones `20261028000000` a `20261029000000` aplicadas al Supabase remoto (2026-10-24).
 
+## Fase 7 (facturación electrónica SUNAT BETA): pendientes
+- [ ] **Nota de crédito** (07) para revertir un comprobante aceptado; hoy esa venta no se puede anular (ADR 077).
+- [ ] **Resumen diario** de boletas y **comunicación de baja**; verificar en la norma vigente si las boletas deben ir de una en una o por resumen (la RS 000048-2026 rige desde el 1 de enero de 2027).
+- [ ] Consultar el estado de un comprobante enviado con error de red (`getStatus` / consulta de CDR en producción).
+- [ ] **Producción**: certificado digital registrado, Clave SOL y homologación, o un OSE/PSE; con un contador.
+- [ ] Comprobantes para boticas del Nuevo RUS (sin IGV desglosado).
+- [ ] Desplegar `einvoice-emit` y su certificado en el proyecto remoto (requiere `supabase login` del dueño).
+
 ## Calidad (refactor del 2026-10-24)
 - [x] Lógica de lotes en un solo lugar (`private.receive_lot`, ADR 069).
 - [x] Formularios de Compras y Temperatura con react-hook-form + zod (ADR 070).

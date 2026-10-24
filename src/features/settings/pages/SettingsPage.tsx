@@ -39,6 +39,9 @@ function SettingsForm({ settings }: { settings: PharmacySettings }) {
       tradeName: settings.tradeName ?? '',
       ruc: settings.ruc ?? '',
       chargesIgv: settings.chargesIgv,
+      fiscalAddress: settings.fiscalAddress ?? '',
+      ubigeo: settings.ubigeo ?? '',
+      einvoiceEnabled: settings.einvoiceEnabled,
     },
   })
   const chargesIgv = useWatch({ control, name: 'chargesIgv' })
@@ -112,6 +115,34 @@ function SettingsForm({ settings }: { settings: PharmacySettings }) {
                 Es un comprobante interno de prueba: no reemplaza a la boleta o factura electrónica de SUNAT. Consulta con un contador qué te corresponde.
               </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Comprobantes electrónicos (SUNAT)</CardTitle>
+          <CardDescription>Boleta (B001) o factura (F001) por cada venta, enviada a SUNAT al cobrar.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <SwitchField
+            control={control}
+            name="einvoiceEnabled"
+            label="Emitir comprobantes electrónicos"
+            description="Factura si el cliente tiene RUC; boleta en los demás casos."
+            disabled={submitting}
+          />
+          <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
+            <TextField control={control} name="fiscalAddress" label="Dirección fiscal" placeholder="Av. Larco 1234, Miraflores, Lima" disabled={submitting} />
+            <TextField control={control} name="ubigeo" label="Ubigeo (opcional)" inputMode="numeric" maxLength={6} placeholder="150122" disabled={submitting} />
+          </div>
+          <div className="flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="note">
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <p>
+              Se envían al <strong>entorno de PRUEBAS (BETA) de SUNAT</strong>: SUNAT valida y acepta el comprobante, pero{' '}
+              <strong>no tiene validez legal</strong>. Para emitir de verdad se necesita el certificado digital y la Clave SOL de la botica, o
+              un proveedor autorizado (OSE/PSE), con la asesoría de un contador.
+            </p>
           </div>
         </CardContent>
       </Card>

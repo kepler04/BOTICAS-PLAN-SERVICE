@@ -152,12 +152,12 @@ describe.skipIf(!enabled)('integración: IGV y tarjeta (Supabase local)', () => 
   it('el cajero no puede cambiar la configuración tributaria; el admin sí', async () => {
     holder.current = cashier
     await expect(
-      settingsService.updatePharmacy(pharmacyId, { legalName: 'Intento', tradeName: '', ruc: '', chargesIgv: false }),
+      settingsService.updatePharmacy(pharmacyId, { legalName: 'Intento', tradeName: '', ruc: '', chargesIgv: false, fiscalAddress: '', ubigeo: '', einvoiceEnabled: false }),
     ).rejects.toThrow(/No tienes permiso/)
     expect((await settingsService.getPharmacy(pharmacyId)).chargesIgv).toBe(true)
 
     holder.current = admin
-    await settingsService.updatePharmacy(pharmacyId, { legalName: `Botica IGV IT ${run}`, tradeName: '', ruc: '', chargesIgv: false })
+    await settingsService.updatePharmacy(pharmacyId, { legalName: `Botica IGV IT ${run}`, tradeName: '', ruc: '', chargesIgv: false, fiscalAddress: '', ubigeo: '', einvoiceEnabled: false })
     expect((await settingsService.getPharmacy(pharmacyId)).chargesIgv).toBe(false)
   })
 
@@ -179,7 +179,7 @@ describe.skipIf(!enabled)('integración: IGV y tarjeta (Supabase local)', () => 
     expect(r.error).toBeNull()
     holder.current = admin
     await expect(
-      settingsService.updatePharmacy(pharmacyId, { legalName: `Botica IGV IT ${run}`, tradeName: '', ruc, chargesIgv: false }),
+      settingsService.updatePharmacy(pharmacyId, { legalName: `Botica IGV IT ${run}`, tradeName: '', ruc, chargesIgv: false, fiscalAddress: '', ubigeo: '', einvoiceEnabled: false }),
     ).rejects.toThrow(/RUC/)
   })
 })

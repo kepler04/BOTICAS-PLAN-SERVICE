@@ -195,6 +195,10 @@ begin
   update public.lots set created_at = v_ts where pharmacy_id = v_pharmacy;
   update public.lots set expiry_date = current_date - 12 where pharmacy_id = v_pharmacy and lot_code = 'L013-OLD';
   update public.pharmacies set created_at = now() - interval '60 days' where id = v_pharmacy;
+  -- Datos del emisor para la facturacion electronica (SUNAT BETA, pruebas). RUC FICTICIO con digito verificador valido.
+  update public.pharmacies
+    set ruc = '20600000056', fiscal_address = 'Av. Larco 1234, Miraflores, Lima', ubigeo = '150122', einvoice_enabled = true
+    where id = v_pharmacy;
   -- Ejemplo FICTICIO de producto inafecto al IGV (la lista oficial la define el MINSA por decreto supremo).
   -- El resto de productos queda gravado (18 %). Los costos de los lotes son SIN IGV.
   update public.products set tax_affectation = 'inafecto' where pharmacy_id = v_pharmacy and name = 'Metformina 850 mg';

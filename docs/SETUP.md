@@ -88,7 +88,18 @@ Si Docker se reinicia, el contenedor `supabase_edge_runtime_*` puede quedar dete
 6. Añade la URL de Netlify a Site URL / Redirect URLs de Supabase Auth.
 7. Variable opcional `NODE_VERSION=24` si Netlify usa otra versión.
 
-## 5. Despliegue en Vercel
+## 5. Facturación electrónica (SUNAT BETA)
+
+La función `einvoice-emit` firma y envía boletas y facturas al **servicio de pruebas (BETA)** de SUNAT. Los comprobantes no tienen validez legal (ADR 073).
+
+1. Genera el certificado de pruebas (autofirmado): `npm run einvoice:cert`. Queda en `supabase/functions/.env`, que git ignora.
+2. Local: reinicia Supabase (`npx supabase stop && npx supabase start`) para que la función lo lea. Si editas `supabase/functions/_shared/`, reinicia también el contenedor `supabase_edge_runtime_*`: guarda los módulos en caché.
+3. Remoto: `npx supabase login`, luego `npx supabase secrets set --env-file supabase/functions/.env --project-ref <ref>` y `npx supabase functions deploy einvoice-emit --project-ref <ref>`.
+4. En la app: **Configuración → Comprobantes electrónicos**: RUC (con dígito verificador válido), dirección fiscal y el interruptor.
+
+Variables opcionales de la función: `SUNAT_ENDPOINT` (por defecto el BETA), `SUNAT_SOL_USER` y `SUNAT_SOL_PASSWORD` (por defecto `MODDATOS`, las credenciales públicas del BETA).
+
+## 5b. Despliegue en Vercel
 
 `vercel.json` ya trae lo necesario: el comando de compilación, la carpeta `dist`, la reescritura de rutas a `index.html` (sin ella, recargar `/ventas` da 404) y las mismas cabeceras de seguridad que `public/_headers`. Una prueba (`src/test/deployHeaders.test.ts`) impide que los dos archivos se desincronicen.
 

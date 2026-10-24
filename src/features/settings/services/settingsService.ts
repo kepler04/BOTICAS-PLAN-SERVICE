@@ -18,13 +18,16 @@ export type PharmacySettings = {
   tradeName: string | null
   ruc: string | null
   chargesIgv: boolean
+  fiscalAddress: string | null
+  ubigeo: string | null
+  einvoiceEnabled: boolean
 }
 
 export const settingsService = {
   async getPharmacy(pharmacyId: string): Promise<PharmacySettings> {
     const { data, error } = await supabase
       .from('pharmacies')
-      .select('id, legal_name, trade_name, ruc, charges_igv')
+      .select('id, legal_name, trade_name, ruc, charges_igv, fiscal_address, ubigeo, einvoice_enabled')
       .eq('id', pharmacyId)
       .single()
     if (error) fail(error, 'No se pudo cargar la configuración de la botica.')
@@ -34,6 +37,9 @@ export const settingsService = {
       tradeName: data.trade_name,
       ruc: data.ruc,
       chargesIgv: data.charges_igv,
+      fiscalAddress: data.fiscal_address,
+      ubigeo: data.ubigeo,
+      einvoiceEnabled: data.einvoice_enabled,
     }
   },
 
@@ -45,6 +51,9 @@ export const settingsService = {
         trade_name: v.tradeName.trim() === '' ? null : v.tradeName.trim(),
         ruc: v.ruc.trim() === '' ? null : v.ruc.trim(),
         charges_igv: v.chargesIgv,
+        fiscal_address: v.fiscalAddress.trim() === '' ? null : v.fiscalAddress.trim(),
+        ubigeo: v.ubigeo.trim() === '' ? null : v.ubigeo.trim(),
+        einvoice_enabled: v.einvoiceEnabled,
       })
       .eq('id', pharmacyId)
       .select('id')

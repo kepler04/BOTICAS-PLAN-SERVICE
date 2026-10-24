@@ -35,6 +35,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Certificado AUTOFIRMADO para firmar comprobantes en SUNAT BETA (pruebas). Se genera en cada corrida: nunca se versiona.
+      - name: "Certificado de pruebas para SUNAT BETA"
+        run: npm run einvoice:cert
       # Supabase local en Docker. Se omiten los servicios que las pruebas no usan para acelerar el arranque.
       - name: "Levantar Supabase local"
         run: npx supabase start -x studio,imgproxy,logflare,vector,realtime,storage-api,mailpit,supavisor
@@ -61,7 +64,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # El E2E necesita edge-runtime (invitar usuarios); no se excluye.
+      - name: "Certificado de pruebas para SUNAT BETA"
+        run: npm run einvoice:cert
+      # El E2E necesita edge-runtime (invitar usuarios y facturación electrónica); no se excluye.
       - name: "Levantar Supabase local"
         run: npx supabase start -x studio,imgproxy,logflare,vector,realtime,storage-api,mailpit,supavisor
       - name: "Recorrido E2E (registro → ventas → compras → usuarios…)"
