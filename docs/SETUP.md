@@ -87,3 +87,12 @@ Si Docker se reinicia, el contenedor `supabase_edge_runtime_*` puede quedar dete
 5. `public/_redirects` ya contiene el fallback SPA (`/*  /index.html  200`).
 6. Añade la URL de Netlify a Site URL / Redirect URLs de Supabase Auth.
 7. Variable opcional `NODE_VERSION=24` si Netlify usa otra versión.
+
+## 5. Despliegue en Vercel
+
+`vercel.json` ya trae lo necesario: el comando de compilación, la carpeta `dist`, la reescritura de rutas a `index.html` (sin ella, recargar `/ventas` da 404) y las mismas cabeceras de seguridad que `public/_headers`. Una prueba (`src/test/deployHeaders.test.ts`) impide que los dos archivos se desincronicen.
+
+1. En Vercel: *Add New → Project* e importa el repositorio de GitHub (Vercel detecta Vite).
+2. *Settings → Environment Variables*: agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (la clave **anon/publishable**, nunca `service_role`) para *Production* y *Preview*. Vite las incrusta **al compilar**: después de agregarlas o cambiarlas hay que volver a desplegar (*Deployments → Redeploy*). Sin ellas la app muestra "Configuración incompleta".
+3. En Supabase, *Authentication → URL Configuration*: *Site URL* = la URL de Vercel y, en *Redirect URLs*, `https://TU-SITIO.vercel.app/restablecer-contrasena`.
+4. El Supabase remoto debe tener **todas** las migraciones (`npx supabase db push`, primero con `--dry-run`) y la función `invite-user` desplegada (ver arriba).
