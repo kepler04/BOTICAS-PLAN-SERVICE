@@ -80,7 +80,7 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [ ] Varias sucursales: `member_branches`, precios por sucursal y traslados.
 - [ ] Toma de inventario guiada (conteo físico), descuentos/promociones, etiquetas de código de barras.
 - [ ] Alternativas también para productos **con** stock (p. ej. ofrecer el genérico más barato).
-- [x] Migraciones de las Fases 5 y 6 aplicadas al Supabase remoto (2026-10-24). Pendiente: desplegar `invite-user` (requiere `supabase login` del dueño) y configurar *Site URL* / *Redirect URLs*.
+- [x] Migraciones de las Fases 5 y 6 aplicadas al Supabase remoto (2026-10-24). `invite-user` desplegada. Pendiente: configurar *Site URL* / *Redirect URLs* en Supabase Auth.
 
 ## Fase 6 (cliente, temperatura, DIGEMID, compras, kardex): pendientes
 - [ ] **Sugerido de compra** por rotación y stock mínimo; órdenes de compra y cuentas por pagar.
@@ -97,7 +97,7 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [ ] Consultar el estado de un comprobante enviado con error de red (`getStatus` / consulta de CDR en producción).
 - [ ] **Producción**: certificado digital registrado, Clave SOL y homologación, o un OSE/PSE; con un contador.
 - [ ] Comprobantes para boticas del Nuevo RUS (sin IGV desglosado).
-- [ ] Desplegar `einvoice-emit` y su certificado en el proyecto remoto (requiere `supabase login` del dueño).
+- [x] `einvoice-emit` e `invite-user` desplegadas en el proyecto remoto con sus secretos (2026-10-24); la botica demo en la nube emite boletas aceptadas por SUNAT BETA.
 
 ## Calidad (refactor del 2026-10-24)
 - [x] Lógica de lotes en un solo lugar (`private.receive_lot`, ADR 069).
