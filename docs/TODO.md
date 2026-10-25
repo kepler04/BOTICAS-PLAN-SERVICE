@@ -92,8 +92,9 @@ Comparación con otros sistemas y brechas en [COMPARATIVA.md](COMPARATIVA.md).
 - [x] Migraciones `20261028000000` a `20261029000000` aplicadas al Supabase remoto (2026-10-24).
 
 ## Fase 7 (facturación electrónica SUNAT BETA): pendientes
-- [ ] **Nota de crédito** (07) para revertir un comprobante aceptado; hoy esa venta no se puede anular (ADR 077).
-- [ ] **Resumen diario** de boletas y **comunicación de baja**; verificar en la norma vigente si las boletas deben ir de una en una o por resumen (la RS 000048-2026 rige desde el 1 de enero de 2027).
+- [x] **Nota de crédito** (07) que anula un comprobante aceptado y luego la venta (Fase 8, ADR 078).
+- [ ] Nota de crédito **parcial** (devolución de un ítem, catálogo 09 código 07) y anulación tras el cierre de caja.
+- [ ] **Resumen diario** y **comunicación de baja**: no implementados a propósito (ADR 079); confirmar con un contador si el envío individual basta.
 - [ ] Consultar el estado de un comprobante enviado con error de red (`getStatus` / consulta de CDR en producción).
 - [ ] **Producción**: certificado digital registrado, Clave SOL y homologación, o un OSE/PSE; con un contador.
 - [ ] Comprobantes para boticas del Nuevo RUS (sin IGV desglosado).

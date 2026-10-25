@@ -21,7 +21,7 @@ import { VoidSaleDialog } from '@/features/sales/components/VoidSaleDialog'
 import { useSalesList } from '@/features/sales/hooks/useSales'
 import { formatReceiptNumber } from '@/features/sales/lib/cart'
 import { SALES_PAGE_SIZE, type SalesFilters } from '@/features/sales/services/salesService'
-import { PAYMENT_LABELS, saleEinvoice, type SaleRow } from '@/features/sales/types'
+import { PAYMENT_LABELS, saleCreditNote, saleEinvoice, type SaleRow } from '@/features/sales/types'
 import { formatPEN } from '@/lib/format'
 
 const dateTime = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyle: 'short' })
@@ -176,11 +176,19 @@ const EINVOICE_LABEL = { accepted: 'aceptada', observed: 'observada', pending: '
 /** Número y estado del comprobante electrónico de la venta, si lo tiene. */
 function EinvoiceBadge({ row }: { row: SaleRow }) {
   const e = saleEinvoice(row)
+  const nc = saleCreditNote(row)
   if (!e) return null
   const ok = e.status === 'accepted' || e.status === 'observed'
   return (
-    <div className={`text-xs ${ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
-      {e.series}-{e.number} · {EINVOICE_LABEL[e.status]}
-    </div>
+    <>
+      <div className={`text-xs ${ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+        {e.series}-{e.number} · {EINVOICE_LABEL[e.status]}
+      </div>
+      {nc ? (
+        <div className="text-xs text-muted-foreground">
+          Nota de crédito {nc.series}-{nc.number} · {EINVOICE_LABEL[nc.status]}
+        </div>
+      ) : null}
+    </>
   )
 }

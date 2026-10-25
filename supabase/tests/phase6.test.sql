@@ -228,6 +228,8 @@ select is((select quantity from public.lots where product_id = '66666666-eeee-40
   'y la primera linea no sumo nada (todo o nada)');
 
 -- ============ Kardex de G ============
+-- El kardex trabaja en dias de Lima: se consulta con la fecha de Lima, no con current_date (UTC), que de noche
+-- (19:00-24:00 en Lima) ya es el dia siguiente.
 -- Cajero vende 30 u. de G (sale por FEFO del unico lote, costo 0.50).
 select set_config('request.jwt.claims', '{"sub":"66666666-0000-4000-8000-000000000002","role":"authenticated"}', true);
 select public.create_sale('66666666-aaaa-4000-8000-000000000001',
@@ -236,26 +238,26 @@ select set_config('request.jwt.claims', '{"sub":"66666666-0000-4000-8000-0000000
 
 -- Hoy: saldo inicial 0 | +100 x 0.40 = 40.00 | +100 x 0.60 = 60.00 | -30 x 0.50 = -15.00 -> 170 u., S/ 85.00
 select is((select count(*)::int from public.report_kardex('66666666-aaaa-4000-8000-000000000001',
-            '66666666-eeee-4000-8000-0000000000a1', current_date, current_date)), 4,
+            '66666666-eeee-4000-8000-0000000000a1', (now() at time zone 'America/Lima')::date, (now() at time zone 'America/Lima')::date)), 4,
   'kardex: saldo inicial + 3 movimientos');
 select is((select kind || '|' || balance_quantity || '|' || balance_value from public.report_kardex('66666666-aaaa-4000-8000-000000000001',
-            '66666666-eeee-4000-8000-0000000000a1', current_date, current_date) limit 1),
+            '66666666-eeee-4000-8000-0000000000a1', (now() at time zone 'America/Lima')::date, (now() at time zone 'America/Lima')::date) limit 1),
   'opening|0|0.00', 'la primera fila es el saldo inicial');
 select is((select string_agg(coalesce(quantity_in, -quantity_out) || '@' || value_delta || '=' || balance_quantity || '/' || balance_value, ' ; ')
            from public.report_kardex('66666666-aaaa-4000-8000-000000000001', '66666666-eeee-4000-8000-0000000000a1',
-                                     current_date, current_date) where kind <> 'opening'),
+                                     (now() at time zone 'America/Lima')::date, (now() at time zone 'America/Lima')::date) where kind <> 'opening'),
   '100@40.00=100/40.00 ; 100@60.00=200/100.00 ; -30@-15.00=170/85.00',
   'entradas y salida valorizadas con saldo acumulado');
 select is((select k.balance_value from public.report_kardex('66666666-aaaa-4000-8000-000000000001',
-            '66666666-eeee-4000-8000-0000000000a1', current_date, current_date) with ordinality k order by k.ordinality desc limit 1),
+            '66666666-eeee-4000-8000-0000000000a1', (now() at time zone 'America/Lima')::date, (now() at time zone 'America/Lima')::date) with ordinality k order by k.ordinality desc limit 1),
   (select round(sum(quantity * unit_cost), 2) from public.lots where product_id = '66666666-eeee-4000-8000-0000000000a1'),
   'el saldo valorizado coincide con el valor de los lotes');
 select ok((select bool_or(document like 'Factura F001-000123 · Droguería Andina SAC') and bool_or(document like 'T001-%')
            from public.report_kardex('66666666-aaaa-4000-8000-000000000001', '66666666-eeee-4000-8000-0000000000a1',
-                                     current_date, current_date)),
+                                     (now() at time zone 'America/Lima')::date, (now() at time zone 'America/Lima')::date)),
   'cada movimiento muestra su documento (factura del proveedor o comprobante de venta)');
 select is((select balance_quantity || '|' || balance_value from public.report_kardex('66666666-aaaa-4000-8000-000000000001',
-            '66666666-eeee-4000-8000-0000000000a1', current_date + 1, current_date + 1)),
+            '66666666-eeee-4000-8000-0000000000a1', (now() at time zone 'America/Lima')::date + 1, (now() at time zone 'America/Lima')::date + 1)),
   '170|85.00', 'el dia siguiente arranca con el saldo de hoy');
 
 -- ============ Otra botica ============

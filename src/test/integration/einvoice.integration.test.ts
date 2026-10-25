@@ -129,6 +129,40 @@ describe.skipIf(!sunatReachable)('facturación electrónica contra SUNAT BETA (E
     expect(again.attempts).toBe(1)
   })
 
+  const stock = async () => (await salesService.searchSellable(branchId, 'Producto IT'))[0]!.sellableUnits
+
+  it('nota de crédito: anula la boleta aceptada (BC01-1 aceptada por SUNAT), la venta queda anulada y el stock vuelve', async () => {
+    const id = await sell(4)
+    await einvoiceService.emit(id)
+    const before = await stock()
+    const r = await einvoiceService.issueCreditNote(id, 'Cliente desistió de la compra')
+    expect(r.creditNote).toMatchObject({ docType: '07', series: 'BC01', number: 1, status: 'accepted', reason: 'Cliente desistió de la compra' })
+    expect(r.creditNote.sunatDescription).toMatch(/La Nota de Credito numero BC01-1, ha sido aceptada/)
+    expect(r.saleVoided).toBe(true)
+    expect((await salesService.getSale(id)).status).toBe('voided')
+    expect(await stock()).toBe(before + 4)
+    expect(await einvoiceService.getCreditNoteBySale(id)).toMatchObject({ series: 'BC01', number: 1 })
+    expect(await einvoiceService.getBySale(id)).toMatchObject({ docType: '03', status: 'accepted' }) // el original no cambia
+
+    // Reintentar converge: misma nota, un solo envío, sin errores.
+    const again = await einvoiceService.issueCreditNote(id, 'otro motivo')
+    expect(again).toMatchObject({ saleVoided: true, creditNote: { id: r.creditNote.id, attempts: 1 } })
+  })
+
+  it('nota de crédito de una factura: serie FC01', async () => {
+    const id = await sell(1, { docType: 'ruc', docNumber: '20600000048', name: 'Clinica San Gabriel SAC' })
+    await einvoiceService.emit(id)
+    const r = await einvoiceService.issueCreditNote(id, 'Error en los datos del cliente')
+    expect(r).toMatchObject({ saleVoided: true, creditNote: { series: 'FC01', number: 1, status: 'accepted' } })
+  })
+
+  it('sin comprobante aceptado o sin motivo, la nota se rechaza con un mensaje claro', async () => {
+    const id = await sell(1) // vendida pero sin emitir su comprobante
+    await expect(einvoiceService.issueCreditNote(id, 'Cliente desistió')).rejects.toThrow(/no tiene un comprobante aceptado/)
+    await einvoiceService.emit(id)
+    await expect(einvoiceService.issueCreditNote(id, 'no')).rejects.toThrow(/motivo/)
+  })
+
   it('una venta con comprobante aceptado ya no se puede anular (requiere nota de crédito)', async () => {
     const id = await sell(1)
     await einvoiceService.emit(id)

@@ -9,7 +9,7 @@ import {
   parseSoapResponse,
   qrText,
 } from '../../supabase/functions/_shared/einvoice/sunat.ts'
-import { buildInvoiceXml, documentName, type UblInput } from '../../supabase/functions/_shared/einvoice/ubl.ts'
+import { buildCreditNoteXml, buildInvoiceXml, documentName, type UblInput } from '../../supabase/functions/_shared/einvoice/ubl.ts'
 
 describe('amountInWords (leyenda 1000)', () => {
   it.each([
@@ -103,6 +103,43 @@ describe('buildInvoiceXml (UBL 2.1)', () => {
 
   it('nombre del archivo: RUC-TIPO-SERIE-NUMERO', () => {
     expect(documentName('20600000013', '01', 'F001', 7)).toBe('20600000013-01-F001-7')
+  })
+})
+
+describe('buildCreditNoteXml (nota de crédito 07)', () => {
+  const { docType: _boleta, ...doc } = base
+  const xml = buildCreditNoteXml({
+    ...doc,
+    series: 'BC01',
+    number: 3,
+    reference: { docType: '03', id: 'B001-12' },
+    reasonCode: '01',
+    reasonDescription: 'Cliente desistió de la compra',
+  })
+
+  it('es un CreditNote con su número y sin tipo de factura ni forma de pago', () => {
+    expect(xml).toContain('<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"')
+    expect(xml).toContain('<cbc:ID>BC01-3</cbc:ID>')
+    expect(xml).not.toContain('InvoiceTypeCode')
+    expect(xml).not.toContain('FormaPago')
+  })
+
+  it('referencia el comprobante que anula y el motivo (catálogo 09, código 01)', () => {
+    expect(xml).toMatch(/<cac:DiscrepancyResponse>\s*<cbc:ReferenceID>B001-12<\/cbc:ReferenceID>/)
+    expect(xml).toMatch(/catalogo09">01<\/cbc:ResponseCode>/)
+    expect(xml).toContain('<![CDATA[Cliente desistió de la compra]]>')
+    expect(xml).toMatch(/<cac:InvoiceDocumentReference>\s*<cbc:ID>B001-12<\/cbc:ID>\s*<cbc:DocumentTypeCode[^>]*>03</)
+  })
+
+  it('repite las líneas y totales de la venta, con CreditNoteLine y CreditedQuantity', () => {
+    expect(xml.match(/<cac:CreditNoteLine>/g)).toHaveLength(2)
+    expect(xml).toMatch(/<cbc:CreditedQuantity[^>]*>2<\/cbc:CreditedQuantity>/)
+    expect(xml).not.toContain('InvoiceLine')
+    expect(xml).toContain('<cbc:PayableAmount currencyID="PEN">51.05</cbc:PayableAmount>')
+  })
+
+  it('nombre del archivo con tipo 07', () => {
+    expect(documentName('20600000013', '07', 'FC01', 1)).toBe('20600000013-07-FC01-1')
   })
 })
 

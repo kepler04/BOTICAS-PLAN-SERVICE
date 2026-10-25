@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { AlertTriangle, CheckCircle2, CircleX, FileUp, Loader2, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useEinvoice, useEmitEinvoice } from '@/features/einvoice/hooks/useEinvoice'
+import { useCreditNote, useEinvoice, useEmitEinvoice } from '@/features/einvoice/hooks/useEinvoice'
 import { DOC_TYPE_NAMES, type Einvoice } from '@/features/einvoice/services/einvoiceService'
 import { usePharmacySettings } from '@/features/settings/hooks/useSettings'
 
@@ -26,6 +26,7 @@ const STYLES: Record<Einvoice['status'], string> = {
 export function EinvoicePanel({ saleId, autoEmit = false, voided = false }: Props) {
   const settings = usePharmacySettings()
   const einvoice = useEinvoice(saleId)
+  const creditNote = useCreditNote(saleId)
   const emit = useEmitEinvoice()
   const enabled = settings.data?.einvoiceEnabled ?? false
   const started = useRef(false)
@@ -77,6 +78,8 @@ export function EinvoicePanel({ saleId, autoEmit = false, voided = false }: Prop
         </p>
       ) : null}
 
+      {creditNote.data ? <CreditNoteLine note={creditNote.data} /> : null}
+
       {emit.isError ? <p className="text-sm text-destructive">{emit.error.message}</p> : null}
 
       {canRetry && !sending ? (
@@ -86,5 +89,28 @@ export function EinvoicePanel({ saleId, autoEmit = false, voided = false }: Prop
         </Button>
       ) : null}
     </section>
+  )
+}
+
+const NOTE_STATUS: Record<Einvoice['status'], string> = {
+  accepted: 'aceptada por SUNAT',
+  observed: 'aceptada por SUNAT con observaciones',
+  pending: 'pendiente de envío',
+  rejected: 'rechazada por SUNAT',
+  error: 'no se pudo enviar',
+}
+
+/** La nota de crédito que anula el comprobante (si existe). */
+function CreditNoteLine({ note }: { note: Einvoice }) {
+  const ok = note.status === 'accepted' || note.status === 'observed'
+  return (
+    <div className={`rounded-lg border p-3 text-sm ${STYLES[note.status]}`}>
+      <p className="font-medium">
+        {DOC_TYPE_NAMES['07']} {note.series}-{note.number}: {NOTE_STATUS[note.status]}
+      </p>
+      <p className="text-xs">
+        {ok ? 'Anula el comprobante de esta venta.' : note.sunatDescription ?? 'La venta sigue vigente.'} Motivo: {note.reason}
+      </p>
+    </div>
   )
 }

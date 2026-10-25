@@ -230,7 +230,7 @@ export const salesService = {
     const from = f.page * size
     let query = supabase
       .from('sales')
-      .select('*, profiles!sales_created_by_fkey(full_name), einvoices(series, number, status)', { count: 'exact' })
+      .select('*, profiles!sales_created_by_fkey(full_name), einvoices(doc_type, series, number, status)', { count: 'exact' })
       .eq('branch_id', branchId)
       .order('receipt_number', { ascending: false })
       .range(from, from + size - 1)

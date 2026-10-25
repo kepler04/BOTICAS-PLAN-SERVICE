@@ -22,7 +22,7 @@ ERP SaaS **multi-tenant** para boticas pequeñas del Perú: punto de venta, inve
 | **Impuesto peruano (IGV 18 %)** | Precios con IGV incluido, afectación (gravado / exonerado / inafecto) por producto, desglose en el comprobante, ganancia sobre venta neta. La misma regla de redondeo en SQL y en TypeScript con los mismos vectores de prueba. Qué se verificó y qué no: [COMPARATIVA](docs/COMPARATIVA.md). |
 | **Seguridad del navegador** | CSP estricta (`script-src 'self'`) comprobada con la app real y un control negativo; PWA que nunca cachea la API. |
 | **Pruebas por capas** | pgTAP sobre la base real (incluye una auditoría que falla si una tabla nueva queda sin RLS), integración de los servicios contra PostgREST y un recorrido E2E en navegador real. Detalle abajo. |
-| **Decisiones documentadas** | [77 decisiones de arquitectura](docs/DECISIONS.md) con su motivo, y un registro de los errores que las propias pruebas encontraron. |
+| **Decisiones documentadas** | [80 decisiones de arquitectura](docs/DECISIONS.md) con su motivo, y un registro de los errores que las propias pruebas encontraron. |
 | **UX pensada para personal no técnico** | Todo en español, lector de código de barras, vuelto automático, vista móvil, tabla equivalente de cada gráfico, descarga a CSV y accesibilidad (encabezados reales, contraste verificado). |
 
 ## Funcionalidades
@@ -35,7 +35,7 @@ ERP SaaS **multi-tenant** para boticas pequeñas del Perú: punto de venta, inve
 - **Cliente en la venta**: DNI, RUC (con dígito verificador), carné de extranjería o pasaporte. Opcional, y **obligatorio cuando la venta supera S/ 700** (regla de SUNAT); un DNI ya registrado completa el nombre.
 - **Compras** (administrador): proveedores y registro de la factura del proveedor; el stock entra con lote, vencimiento y costo sin IGV, en una sola transacción y sin facturas duplicadas. **Kardex valorizado** por producto.
 - **Temperatura y humedad**: registro diario del local y de la refrigeradora para la inspección sanitaria; fuera de rango exige anotar qué se hizo; el dashboard avisa si falta el de hoy.
-- **Facturación electrónica (SUNAT BETA)**: cada venta genera su **boleta (B001)** o **factura (F001)** en XML UBL 2.1, firmada y enviada a SUNAT por una Edge Function; el comprobante muestra la respuesta de SUNAT, el valor resumen y el **QR**. Es el entorno de **pruebas** de SUNAT: los comprobantes no tienen validez legal.
+- **Facturación electrónica (SUNAT BETA)**: cada venta genera su **boleta (B001)** o **factura (F001)** en XML UBL 2.1, firmada y enviada a SUNAT por una Edge Function; el comprobante muestra la respuesta de SUNAT, el valor resumen y el **QR**. Anular una venta con comprobante aceptado emite su **nota de crédito** (BC01/FC01) y solo anula si SUNAT la acepta. Es el entorno de **pruebas** de SUNAT: los comprobantes no tienen validez legal.
 - **Precios DIGEMID**: código DIGEMID por producto y exportación de la lista de precios para el reporte mensual al Observatorio.
 - **Usuarios** (administrador): invitar cajeros con un enlace de un solo uso, cambiar el rol y activar/desactivar. La botica nunca se queda sin administrador.
 - **Configuración**: datos de la botica y si **cobra IGV** (p. ej. Nuevo RUS no lo desglosa).
@@ -100,10 +100,10 @@ Entra primero como **administrador** (ve reportes) y luego como **cajero** (no v
 
 | Comando | Qué cubre |
 |---|---|
-| `npm test` | 191 pruebas unitarias y de componentes (dinero, **IGV**, **RUC y DNI**, **XML UBL y respuesta de SUNAT**, monto en letras, compras, temperatura, carrito, presentaciones, esquemas, CSV, rangos de fechas…) |
-| `npx supabase test db` | **301 aserciones pgTAP** sobre Postgres real: aislamiento entre boticas, permisos por rol, stock negativo, FEFO, idempotencia, caja, anulaciones, reportes, zona horaria de Lima, **IGV**, **nunca sin administrador**, regla de S/ 700, registro de temperatura, compras, kardex, **comprobantes electrónicos** y una **auditoría de seguridad** (RLS en toda tabla, `anon` sin privilegios, funciones con `search_path` fijo) |
-| `npm run test:integration` | 80 pruebas de los **servicios reales** contra PostgREST y la Edge Function (filtros, vistas, RPC, rol de cajero, IGV, **concurrencia**, invitación de usuarios, alternativas, cliente en la venta, temperatura, compras, kardex y **boleta y factura aceptadas por SUNAT BETA**) |
-| `npm run test:e2e` | Recorrido de **46 pasos en un navegador real**: registro → producto → stock → caja → venta con IGV y tarjeta → anulación → reportes → configuración → invitar a un cajero y que entre → temperatura → compra y factura duplicada → kardex → venta de más de S/ 700 con DNI → código DIGEMID → boleta y factura electrónicas aceptadas por SUNAT → vista móvil |
+| `npm test` | 195 pruebas unitarias y de componentes (dinero, **IGV**, **RUC y DNI**, **XML UBL y respuesta de SUNAT**, monto en letras, compras, temperatura, carrito, presentaciones, esquemas, CSV, rangos de fechas…) |
+| `npx supabase test db` | **317 aserciones pgTAP** sobre Postgres real: aislamiento entre boticas, permisos por rol, stock negativo, FEFO, idempotencia, caja, anulaciones, reportes, zona horaria de Lima, **IGV**, **nunca sin administrador**, regla de S/ 700, registro de temperatura, compras, kardex, **comprobantes electrónicos y notas de crédito** y una **auditoría de seguridad** (RLS en toda tabla, `anon` sin privilegios, funciones con `search_path` fijo) |
+| `npm run test:integration` | 83 pruebas de los **servicios reales** contra PostgREST y la Edge Function (filtros, vistas, RPC, rol de cajero, IGV, **concurrencia**, invitación de usuarios, alternativas, cliente en la venta, temperatura, compras, kardex y **boleta, factura y notas de crédito aceptadas por SUNAT BETA**) |
+| `npm run test:e2e` | Recorrido de **46 pasos en un navegador real**: registro → producto → stock → caja → venta con IGV y tarjeta → anulación → reportes → configuración → invitar a un cajero y que entre → temperatura → compra y factura duplicada → kardex → venta de más de S/ 700 con DNI → código DIGEMID → boleta y factura electrónicas aceptadas por SUNAT → anular con nota de crédito → vista móvil |
 | `npm run test:pwa` | 9 comprobaciones de la PWA en el navegador (manifest, íconos, service worker, página sin conexión, sin cachear la API) |
 | `npm run test:a11y` | **Auditoría de accesibilidad** (axe-core, WCAG 2.1 A/AA) en 20 pantallas reales, como administrador y como cajero: 0 infracciones |
 | `npm run test:csp` | Sirve la compilación con las cabeceras reales y verifica que la app **no viola su propia CSP**; control negativo: un script inyectado se bloquea |
@@ -131,7 +131,7 @@ scripts/               demo, capturas, E2E, pruebas de integración
 src/app/               providers, router
 src/components/        ui/ (shadcn), layout/, common/
 src/features/          auth · onboarding · branches · products · inventory · sales · cash · reports · dashboard · settings · users · sanitary · purchases · einvoice
-supabase/functions/    invite-user, einvoice-emit (Edge Functions) y _shared/einvoice (UBL 2.1, firma, SUNAT)
+supabase/functions/    invite-user, einvoice-emit, einvoice-credit-note (Edge Functions) y _shared/einvoice (UBL 2.1, firma, SUNAT)
 src/lib/               formato de dinero y fechas, CSV, errores de BD, cliente Supabase
 ```
 
@@ -148,7 +148,7 @@ Guía paso a paso en [docs/SETUP.md](docs/SETUP.md): crear el proyecto, aplicar 
 
 ## Límites conocidos y siguientes pasos
 
-Es un proyecto de aprendizaje, así que quedan fuera a propósito: la facturación electrónica **con validez legal** (hoy va al entorno de pruebas de SUNAT; producción exige certificado digital registrado y Clave SOL, o un OSE/PSE, y un contador), notas de crédito y resumen diario de boletas, libros de estupefacientes y el envío del reporte de precios a DIGEMID (se exporta, no se sube), cuentas por pagar y sugerido de compra, consulta de DNI/RUC en RENIEC/SUNAT, varias sucursales por usuario, pagos mixtos, devoluciones tras el cierre de caja, impresión térmica directa, envío de invitaciones por correo (hoy se comparte el enlace) y venta sin conexión. El IGV de cada medicamento (gravado, exonerado o inafecto) **lo define el administrador con su contador**: el sistema no trae una lista oficial. La comparación con sistemas del mercado y el detalle de lo verificado están en [docs/COMPARATIVA.md](docs/COMPARATIVA.md); la lista completa de pendientes, en [docs/TODO.md](docs/TODO.md).
+Es un proyecto de aprendizaje, así que quedan fuera a propósito: la facturación electrónica **con validez legal** (hoy va al entorno de pruebas de SUNAT; producción exige certificado digital registrado y Clave SOL, o un OSE/PSE, y un contador), notas de crédito parciales (devolución de un ítem), libros de estupefacientes y el envío del reporte de precios a DIGEMID (se exporta, no se sube), cuentas por pagar y sugerido de compra, consulta de DNI/RUC en RENIEC/SUNAT, varias sucursales por usuario, pagos mixtos, devoluciones tras el cierre de caja, impresión térmica directa, envío de invitaciones por correo (hoy se comparte el enlace) y venta sin conexión. El IGV de cada medicamento (gravado, exonerado o inafecto) **lo define el administrador con su contador**: el sistema no trae una lista oficial. La comparación con sistemas del mercado y el detalle de lo verificado están en [docs/COMPARATIVA.md](docs/COMPARATIVA.md); la lista completa de pendientes, en [docs/TODO.md](docs/TODO.md).
 
 ## Licencia
 

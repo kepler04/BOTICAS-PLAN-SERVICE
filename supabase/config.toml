@@ -423,3 +423,8 @@ entrypoint = "./functions/invite-user/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/einvoice-emit/index.ts"
+
+[functions.einvoice-credit-note]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/einvoice-credit-note/index.ts"

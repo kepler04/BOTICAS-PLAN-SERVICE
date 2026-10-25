@@ -201,14 +201,14 @@ isOneToOne: false
                   ]
                 },"einvoices": {
                   Row: {
-                    "attempts": number,"cdr_xml": string | null,"created_at": string,"created_by": string | null,"doc_type": string,"environment": string,"hash": string | null,"id": string,"number": number,"pharmacy_id": string,"sale_id": string,"sent_at": string | null,"series": string,"status": Database["public"]['Enums']["einvoice_status"],"sunat_code": string | null,"sunat_description": string | null,"sunat_notes": (string)[],"updated_at": string,"xml": string | null
+                    "attempts": number,"cdr_xml": string | null,"created_at": string,"created_by": string | null,"doc_type": string,"environment": string,"hash": string | null,"id": string,"number": number,"pharmacy_id": string,"reason": string | null,"reference_id": string | null,"sale_id": string,"sent_at": string | null,"series": string,"status": Database["public"]['Enums']["einvoice_status"],"sunat_code": string | null,"sunat_description": string | null,"sunat_notes": (string)[],"updated_at": string,"xml": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type": string,"environment"?: string,"hash"?: string | null,"id"?: string,"number": number,"pharmacy_id": string,"sale_id": string,"sent_at"?: string | null,"series": string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
+                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type": string,"environment"?: string,"hash"?: string | null,"id"?: string,"number": number,"pharmacy_id": string,"reason"?: string | null,"reference_id"?: string | null,"sale_id": string,"sent_at"?: string | null,"series": string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
                   }
                   Update: {
-                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type"?: string,"environment"?: string,"hash"?: string | null,"id"?: string,"number"?: number,"pharmacy_id"?: string,"sale_id"?: string,"sent_at"?: string | null,"series"?: string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
+                    "attempts"?: number,"cdr_xml"?: string | null,"created_at"?: string,"created_by"?: string | null,"doc_type"?: string,"environment"?: string,"hash"?: string | null,"id"?: string,"number"?: number,"pharmacy_id"?: string,"reason"?: string | null,"reference_id"?: string | null,"sale_id"?: string,"sent_at"?: string | null,"series"?: string,"status"?: Database["public"]['Enums']["einvoice_status"],"sunat_code"?: string | null,"sunat_description"?: string | null,"sunat_notes"?: (string)[],"updated_at"?: string,"xml"?: string | null
                   }
                   Relationships: [
                     {
@@ -229,6 +229,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "sales"
       referencedColumns: ["pharmacy_id","id"]
+    },{
+      foreignKeyName: "einvoices_reference_id_fkey"
+      columns: ["reference_id"]
+isOneToOne: false
+      referencedRelation: "einvoices"
+      referencedColumns: ["id"]
     }
                   ]
                 },"environment_readings": {
@@ -821,6 +827,36 @@ isOneToOne: false
               "cost": number,"margin": number,"name": string,"net": number,"product_id": string,"profit": number,"revenue": number,"units": number
             }[]
                            },
+"reserve_credit_note":
+{ Args: { "p_reason": string,"p_sale": string }; Returns: {
+              "attempts": number,
+"cdr_xml": string | null,
+"created_at": string,
+"created_by": string | null,
+"doc_type": string,
+"environment": string,
+"hash": string | null,
+"id": string,
+"number": number,
+"pharmacy_id": string,
+"reason": string | null,
+"reference_id": string | null,
+"sale_id": string,
+"sent_at": string | null,
+"series": string,
+"status": Database["public"]['Enums']["einvoice_status"],
+"sunat_code": string | null,
+"sunat_description": string | null,
+"sunat_notes": (string)[],
+"updated_at": string,
+"xml": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "einvoices"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "reserve_einvoice":
 { Args: { "p_sale": string }; Returns: {
               "attempts": number,
@@ -833,6 +869,8 @@ isOneToOne: false
 "id": string,
 "number": number,
 "pharmacy_id": string,
+"reason": string | null,
+"reference_id": string | null,
 "sale_id": string,
 "sent_at": string | null,
 "series": string,

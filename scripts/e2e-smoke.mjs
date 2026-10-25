@@ -690,7 +690,7 @@ try {
     .then((r) => r.ok)
     .catch(() => false)
 
-  await step(`Facturación electrónica: activarla y emitir boleta y factura aceptadas por SUNAT BETA${sunatUp ? '' : ' (SALTADO: SUNAT BETA no responde)'}`, async () => {
+  await step(`Facturación electrónica: activarla, emitir boleta y factura aceptadas por SUNAT BETA y anular con nota de crédito${sunatUp ? '' : ' (SALTADO: SUNAT BETA no responde)'}`, async () => {
     if (!sunatUp) return
     // RUC válido y distinto en cada corrida (es único entre boticas).
     const base = '206' + String(Math.floor(Math.random() * 1e7)).padStart(7, '0')
@@ -739,6 +739,17 @@ try {
     await page.getByRole('tab', { name: 'Historial' }).click()
     await page.getByText('F001-1 · aceptada').waitFor()
     await page.getByText('B001-1 · aceptada').waitFor()
+
+    // Anular la venta de la boleta aceptada: exige nota de crédito y solo anula si SUNAT la acepta.
+    await page.getByRole('row').filter({ hasText: 'B001-1 · aceptada' }).getByRole('button', { name: /Ver venta/ }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Anular' }).click()
+    const voidDialog = page.getByRole('dialog', { name: /Anular venta/ })
+    await voidDialog.getByText(/SUNAT ya aceptó la boleta/).waitFor()
+    await voidDialog.getByLabel('Motivo').fill('Cliente desistió de la compra')
+    await shot('43-anular-con-nota-de-credito')
+    await voidDialog.getByRole('button', { name: 'Emitir nota de crédito y anular' }).click()
+    await page.getByText(/Nota de crédito BC01-1 aceptada por SUNAT\. Venta anulada y stock devuelto\./).waitFor({ timeout: 30000 })
+    await page.getByText('Nota de crédito BC01-1 · aceptada').waitFor()
   })
 
   await step('Vista móvil del POS', async () => {

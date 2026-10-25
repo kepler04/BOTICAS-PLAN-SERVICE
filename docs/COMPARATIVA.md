@@ -34,7 +34,7 @@ Búsqueda web (octubre de 2026) y lectura de las páginas oficiales de SUNAT que
 | **Gestión de usuarios** (invitar cajeros, activar/desactivar, rol) | ✅ | ✅ *(Fase 5)* | Edge Function con `service_role` (ADR 054); el enlace de invitación se comparte a mano (sin SMTP). La botica nunca se queda sin administrador (ADR 055). |
 | Roles y permisos aplicados en la base de datos | 🟡 | ✅ | RLS + validación en cada RPC. |
 | Multi-tenant seguro (varias boticas) | ✅ | ✅ | RLS en todas las tablas + auditoría automática. |
-| **Facturación electrónica SUNAT** (boleta/factura) | ✅ | 🟡 *(Fase 7)* | Boleta B001 y factura F001 en XML UBL 2.1, firmadas y **aceptadas por el servicio BETA de SUNAT**, con QR y valor resumen (ADR 073–077). Falta producción (certificado registrado y Clave SOL, u OSE/PSE), notas de crédito y resumen diario. |
+| **Facturación electrónica SUNAT** (boleta/factura) | ✅ | 🟡 *(Fases 7–8)* | Boleta B001, factura F001 y **nota de crédito** BC01/FC01 en XML UBL 2.1, firmadas y **aceptadas por el servicio BETA de SUNAT**, con QR y valor resumen (ADR 073–080). Falta producción (certificado registrado y Clave SOL, u OSE/PSE) y notas parciales. |
 | Datos del cliente (DNI/RUC) en la venta | ✅ | ✅ *(Fase 6)* | Opcional, y **obligatorio en boletas de más de S/ 700** ([SUNAT](https://orientacion.sunat.gob.pe/03-boleta-de-venta), RS 303-2018). RUC con dígito verificador; sin consulta a RENIEC/SUNAT (ADR 061–062). |
 | **Reporte mensual de precios al Observatorio de DIGEMID** | 🟡 | 🟡 *(Fase 6)* | Obligatorio (DS 014-2011-SA art. 30, RM 040-2010/MINSA; [DIGEMID](https://www.digemid.minsa.gob.pe/Archivos/Comunicados/2023/COM_016-2023.pdf)). Hay código DIGEMID por producto y exportación de precios a CSV; el envío en la plataforma es manual (ADR 065). |
 | **Registro diario de temperatura y humedad** | 🟡 | ✅ *(Fase 6)* | Inmutable, con el día fijado por el servidor y nota obligatoria fuera de rango; aviso en el dashboard si falta el de hoy; CSV para la inspección ([GERESA Lambayeque](https://cdn.www.gob.pe/uploads/document/file/7798233/6583027-000111-2025-gr-lamb-geresa-demid.pdf); ADR 063–064). |
@@ -74,7 +74,7 @@ Búsqueda web (octubre de 2026) y lectura de las páginas oficiales de SUNAT que
 1. **Sugerido de compra** por rotación y stock mínimo (los datos ya existen) y cuentas por pagar.
 2. Varias sucursales (`member_branches`, precios por sucursal, traslados).
 3. Cumplimiento DIGEMID: libros de estupefacientes/psicotrópicos y receta especial (con asesoría de un químico farmacéutico); verificar el formato vigente del reporte de precios.
-4. Facturación electrónica **en producción**: el flujo ya funciona contra SUNAT BETA; falta el certificado real (o un OSE/PSE), notas de crédito y resumen diario, con un contador.
+4. Facturación electrónica **en producción**: boleta, factura y nota de crédito ya funcionan contra SUNAT BETA; falta el certificado real (o un OSE/PSE), con un contador.
 5. Política de datos personales de los clientes (Ley 29733).
 
 ## Fuentes

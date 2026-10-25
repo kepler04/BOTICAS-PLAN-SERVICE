@@ -94,7 +94,7 @@ La función `einvoice-emit` firma y envía boletas y facturas al **servicio de p
 
 1. Genera el certificado de pruebas (autofirmado): `npm run einvoice:cert`. Queda en `supabase/functions/.env`, que git ignora.
 2. Local: reinicia Supabase (`npx supabase stop && npx supabase start`) para que la función lo lea. Si editas `supabase/functions/_shared/`, reinicia también el contenedor `supabase_edge_runtime_*`: guarda los módulos en caché.
-3. Remoto: `npx supabase login`, luego `npx supabase secrets set --env-file supabase/functions/.env --project-ref <ref>` y `npx supabase functions deploy einvoice-emit --project-ref <ref>`.
+3. Remoto: `npx supabase login`, luego `npx supabase secrets set --env-file supabase/functions/.env --project-ref <ref>` y `npx supabase functions deploy einvoice-emit einvoice-credit-note --project-ref <ref>`.
 4. En la app: **Configuración → Comprobantes electrónicos**: RUC (con dígito verificador válido), dirección fiscal y el interruptor.
 
 Variables opcionales de la función: `SUNAT_ENDPOINT` (por defecto el BETA), `SUNAT_SOL_USER` y `SUNAT_SOL_PASSWORD` (por defecto `MODDATOS`, las credenciales públicas del BETA).
